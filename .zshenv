@@ -1,3 +1,3 @@
 export ZDOTDIR=$HOME/.config/zsh
-source $HOME/.config/zsh/.zshrc
+source $ZDOTDIR/.zshrc
 skip_global_compinit=1
