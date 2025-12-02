@@ -1,0 +1,184 @@
+#!/usr/bin/env bash 
+
+# Requirements: 
+ #  Xorg: dunst & dunstify 
+ #  Wayland: notify-send and mako 
+ #  ttf-font-awesome for the icons 
+ #  pulseaudio (if you want support for others, feel free to contribute) 
+  
+ usage="Usage: $(basename "$0") MODE ACTION 
+ Modify volume or brightness and indicate level as 
+ a bar via notifications (either dunst or mako). 
+  
+ Example: 
+    barify vol up 
+  
+ Arguments: 
+    MODE: 
+       Volume:     volume|vol|v 
+       Brightness: brightness|bright|b 
+    ACTION: 
+       Increase:   up|u|inc|i 
+       Decrease:   down|dec|d 
+       Mute:       mute|m" 
+  
+ MODE=-1   # 1 = volume, 2 = brightness 
+ ACTION=-1 # 1 = inc, 2 = down, 3 = mute 
+ ICON= 
+  
+ case $1 in 
+         v*) 
+                 MODE=1 
+                 ICON= 
+                 case $2 in 
+                         up|u|inc|i) 
+                                 ACTION=1 
+                                 ;; 
+                         down|dec|d) 
+                                 ACTION=2 
+                                 ;; 
+                         mute|m) 
+                                 ACTION=3 
+                                 ;; 
+                         *) 
+                                 echo "$usage" 
+                                 exit 1 
+                 esac 
+                 ;; 
+         b*) 
+                 MODE=2 
+                 ICON= 
+                 case $2 in 
+                         up|u|inc|i) 
+                                 ACTION=1 
+                                 ;; 
+                         down|dec|d) 
+                                 ACTION=2 
+                                 ;; 
+                         *) 
+                                 echo "$usage" 
+                                 exit 1 
+                 esac 
+                 ;; 
+         *) 
+                 echo "$usage" 
+                 exit 1 
+ esac 
+  
+ # Lock to assert only a single instance is running. 
+ # xbacklight for example can take quite a while to execute, 
+ # which can lead to the bar going back and forth if multiple instances 
+ # are running simultanously. 
+ LOCKFILE="/tmp/.`basename $0`.lock" 
+ TIMEOUT=0.1 
+ touch $LOCKFILE 
+ exec {FD}<>$LOCKFILE 
+  
+ if ! flock -x -w $TIMEOUT $FD; then 
+         echo "Failed to obtain a lock within $TIMEOUT seconds" 
+         echo "Another instance of `basename $0` is probably running." 
+         exit 1 
+ fi 
+  
+ function get_volume { 
+         wpctl get-volume @DEFAULT_AUDIO_SINK@ | grep '%' | head -n 1 | cut -d '[' -f 2 | cut -d '%' -f 1 
+ } 
+  
+ function is_mute { 
+         wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle | grep '%' | grep -oE '[^ ]+$' | grep off > /dev/null 
+ } 
+  
+ function get_brightness { 
+         if type xbacklight &> /dev/null; then 
+                 xbacklight -get | cut -d '.' -f 1 
+         elif type brightnessctl &> /dev/null; then 
+                 brightnessctl -m | cut -d ',' -f 4 | tr -d '%' 
+         fi 
+ } 
+  
+ # Function to repeat a character 
+ # arg $1: number of repetitions 
+ # arg $2: char to be printed 
+ function repChar { 
+         for (( i = 0; i < $1; i++ )); do 
+                 printf "$2" 
+         done 
+ } 
+  
+ function send_notification { 
+         # If mako is running we dismiss the previous notification and use 
+         # notify-send, since mako will draw a progress bar by itself 
+         if pgrep mako &>/dev/null ; then 
+                 # We replace the existing notification using the synchronous hint merged in 
+                 # https://github.com/emersion/mako/pull/270 (Mako version 1.6) 
+                 # Previously, we worked around this by calling `makoctl dismiss` here. 
+                 if [ $MODE == 1 ] && is_mute ; then 
+                         notify-send " Muted" -h int:value:$1 -t 5000 -h string:x-canonical-private-synchronous:barify-$MODE 
+                 else 
+                         notify-send "$ICON $1%" -h int:value:$1 -t 5000 -h string:x-canonical-private-synchronous:barify-$MODE 
+                 fi 
+                 return 
+         fi 
+  
+         # On dunst, the bar is printed with a fixed width and a padding 
+         # character ("░") so it can be used in a dynamically sized dunst frame 
+         # and is therefore at least somewhat portable between hidpi and 
+         # normal screens. 
+         if pgrep dunst &>/dev/null ; then 
+                 if [ $MODE == 1 ] && is_mute ; then 
+                         dunstify -i NUL -r 2593 -u normal "  Muted" 
+                 else 
+                         length=25 # Number characters for the bar 
+                         div=$((100 / $length)) 
+                         total=$((100 / $div)) 
+                         left=$(($1 / $div)) 
+                         right=$(($total - $left)) 
+                         bar=$(repChar $left "█")$(repChar $right "░") 
+  
+                         dunstify -i NUL -r 2593 -u normal "$ICON $bar" 
+                 fi 
+                 return 
+         fi 
+  
+         echo 'Warning: Neither dunst nor mako was found to be running.' 1>&2 
+ } 
+  
+ if [ $MODE -eq 1 ] # Volume 
+ then 
+         case $ACTION in 
+                 1)      # Up the volume (+ 5%) 
+                         wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+ > /dev/null 
+                         send_notification `get_volume` 
+                         ;; 
+                 2) 
+                         wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%- > /dev/null 
+                         send_notification `get_volume` 
+                         ;; 
+                 3) 
+                         # Toggle mute 
+                         wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle > /dev/null 
+                         send_notification `get_volume` 
+                         ;; 
+         esac 
+ elif [ $MODE -eq 2 ] # Brightness 
+ then 
+         case $ACTION in 
+                 1) 
+                         if type xbacklight &> /dev/null; then 
+                                 xbacklight +8 
+                         elif type brightnessctl &> /dev/null; then 
+                                 brightnessctl -q set 8%+ 
+                         fi 
+                         send_notification `get_brightness` 
+                         ;; 
+                 2) 
+                         if type xbacklight &> /dev/null; then 
+                                 xbacklight -8 
+                         elif type brightnessctl &> /dev/null; then 
+                                 brightnessctl -q set 8%- 
+                         fi 
+                         send_notification `get_brightness` 
+                         ;; 
+         esac 
+ fi 
+ 

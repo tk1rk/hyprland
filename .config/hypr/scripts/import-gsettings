@@ -1,0 +1,19 @@
+#!/bin/sh
+
+exec = hyprctl setcursor ArchCursorComplete 32
+exec = gsettings set org.gnome.desktop.interface cursor-theme "ArchCursorComplete"
+exec = gsettings set org.gnome.desktop.interface cursor-size 32
+
+exec = kvantummanager --set Dracula
+exec = gsettings set org.gnome.desktop.interface icon-theme "Papirus-Dark-Maia"
+exec = gsettings set org.gnome.desktop.interface gtk-theme "Dracula"
+exec = gsettings set org.gnome.desktop.wm.preferences theme "Dracula"
+
+exec = gsettings set org.gnome.desktop.interface font-name "MonoLisa Nerd Font 10"
+exec = gsettings set org.gnome.desktop.interface document-font-name "MonoLisa Nerd Font Regular 10"
+exec = gsettings set org.gnome.desktop.interface monospace-font-name "MonoLisa Nerd Font 9"
+exec = gsettings set org.gnome.desktop.interface font-antialiasing "rgba"
+exec = gsettings set org.gnome.desktop.interface font-hinting "full"
+
+env = XCURSOR_THEME, ArchCursorComplete
+env = XCURSOR_SIZE, 32

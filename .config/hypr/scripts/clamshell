@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+
+## trigger when the switch is toggled
+bindl=,switch:Lid Switch,exec,swaylock --config ~/.config/swaylock/config
+
+# trigger when the switch is turning on
+bindl=,switch:on:Lid Switch,exec,hyprctl keyword monitor "eDP-1, 2880x1800@90, auto, 1"
+
+# trigger when the switch is turning off
+bindl=,switch:off:Lid Switch,exec,hyprctl keyword monitor "eDP-1, disable"
