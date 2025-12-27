@@ -1,0 +1,136 @@
+{
+    "height": 35,
+    "width": 2736,
+    "layer": "top",
+    "position": "top",
+    "mod": "dock",
+    "exclusive": true,
+    "passtrough": false,
+    "gtk-layer-shell": true,
+    "modules-left": ["custom/launcher", "custom/weather"],
+    "modules-middle": ["wlr/workspaces"]
+    "modules-right": ["tray", "network", "pulseaudio",  "backlight", "battery", "custom/lock", "clock", "custom/power-menu"],
+
+    "wlr/workspaces": {
+      "active-only": false, 
+      "all-outputs": true, 
+      "disable-scroll": false, 
+      "on-scroll-up": "hyprctl dispatch workspace -1", 
+      "on-scroll-down": "hyprctl dispatch workspace +1",
+      "format": "{icon}",
+      "on-click": "activate",
+      "format-icons": {
+        "active": "󰮯",
+        "default": "",
+      }
+    },
+    "hyprland/window": {
+      "max-length": 200,
+      "separate-outputs": true,
+    },
+    "tray": {
+      "spacing": 10,
+      "icon-size": 22
+    },
+    "clock": {
+      "format": "{:%H:%M}",
+      "format-alt": "{:%b %d %Y}",
+      "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+    },
+    "backlight": {
+      "device": "eDP-1",
+      "format": "{icon}",
+      "tooltip-format": "{percent}",
+      "format-icons": ["󱩎 ", "󱩏 ", "󱩐 ", "󱩑 ", "󱩒 ", "󱩓 ", "󱩔 ", "󱩕 ", "󱩖 ", "󰛨 "],
+    },
+    "network": {
+      /* "format-wifi": "直", */
+      "format-wifi": "{icon}",
+      "format-ethernet": " ",
+      "format-disconnected": "睊",
+      "tooltip-format": "{essid}",
+      "on-click": "~/.config/waybar/scripts/network/rofi-network-manager.sh",
+      "format-icons": ["󰤯","󰤟","󰤢","󰤥","󰤨"],
+    },
+    "bluetooth": {
+         "format": " {status}",
+	       "format-connected": " {device_alias}",
+	       "format-connected-battery": " {device_alias} {device_battery_percentage}%",
+	        // "format-device-preference": [ "device1", "device2" ], // preference list deciding the displayed device
+	       "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
+	       "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}",
+	       "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
+	       "tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_address}\t{device_battery_percentage}%"
+    },
+   
+    
+    "pulseaudio": {
+      "format": "{icon}",
+      "format-muted": "婢",
+      "format-icons": {
+        "default": ["", "", "墳"]
+      },
+      "on-click": "pavucontrol &"
+    },
+    "battery": {
+      "bat": "BAT0",
+      "adapter": "ADP0",
+      "interval": 60,
+      "states": {
+        "warning": 30,
+        "critical": 15
+      },
+      "max-length": 20,
+      "format": "{icon} ",
+      "format-warning": "{icon}",
+      "format-critical": "{icon}",
+      "format-charging": "<span font-family='Font Awesome 6 Free'></span>",
+      "format-plugged": "ﮣ", 
+
+      "format-alt": "{icon} {time}",
+      "format-full": "ﮣ", 
+      "format-icons": ["󱊡", "󱊢", "󱊣"]
+    },
+    "custom/notification": {
+		    "tooltip": true,
+		    "format": " {icon} ",
+      "format-icons": {
+		      "notification": "",
+			     "none": "",
+			     "dnd-notification": "",
+			     "dnd-none": ""
+		    },
+		    "return-type": "json",
+		    "exec-if": "which swaync-client",
+		    "exec": "swaync-client -swb",
+		    "on-click": "swaync-client -t -sw",
+		    "on-click-right": "swaync-client -d -sw",
+		    "escape": true
+	   },
+    "custom/weather": {
+      "exec": "python3 ~/.config/waybar/scripts/weather.py",
+      "restart-interval": 300,
+      "return-type": "json",
+    },   
+    "custom/lock": {
+      "tooltip" : false,
+      "on-click": "swaylock",
+      "format" : "",
+    },
+    "custom/spotify": {
+      "exec": "python3 ~/.config/waybar/scripts/mediaplayer.py --player spotify",
+      "format": " {}",
+      "return-type": "json",
+      "on-click": "playerctl play-pause",
+      "on-double-click-right": "playerctl next",
+      "on-scroll-down": "playerctl previous",
+    },
+    "custom/power-menu": {
+      "format": " 💀 ";,
+      "on-click": "bash ~/.config/waybar/scripts/power-menu/powermenu.sh &",
+    }, 
+    "custom/launcher": {
+      "format": "  ",
+      "on-click": "rofi -show drun -theme ~/.config/rofi/launchers/apps/launcher.rasi &",
+    },
+}

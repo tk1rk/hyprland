@@ -1,0 +1,120 @@
+{
+    "hyprland/workspaces": {
+        "disable-scroll": false,
+        "all-outputs": true,
+        "format": "{icon}",
+        "format-icons": {
+            "1": " ", 
+            "2": " ", 
+            "3": "󰨞 ",
+            "4": " ", 
+            "5": "󰽴 ", 
+            "6": "󰺷 ", 
+            "active": "󰮯",
+            "default": "",
+        },
+        "on-click": "activate",
+        "on-scroll-up": "hyprctl dispatch workspace e-1",
+        "on-scroll-down": "hyprctl dispatch workspace e+1"
+    },
+
+    "hyprland/window": {
+        "format": "{}",
+        "separate-outputs": true,
+        "on-click-right": "sleep .3 && ~/.config/hypr/resize.sh",
+        "on-click-middle": "hyprctl dispatch killactive"
+    },
+
+    "custom/power-menu": {
+      "format": " 💀 ";,
+      "on-click": "bash ~/.config/waybar/scripts/power-menu/powermenu.sh &",
+    }, 
+
+    "custom/launcher": {
+      "format": "  ",
+      "on-click": "rofi -show drun -theme ~/.config/rofi/launchers/apps/launcher.rasi &",
+    },
+
+    "custom/updates": {
+        "interval": 3600,
+        "format": "󱧘 {}",
+        "exec": "~/.config/waybar/scripts/arch_update.sh",
+        "on-click": "~/.config/waybar/scripts/click_update.sh",
+        "tooltip": true
+    },
+
+    "clock": {
+        "interval": 1,
+        "format": "  {:%H:%M}",
+        "format-alt": "{:%A, %B %d, %Y %H:%M:%S } ",
+        "tooltip-format": "<tt><small>{calendar}</small></tt>",
+        "calendar": {
+                    "mode"          : "month",
+                    "weeks-pos"     : "right",
+                    "on-scroll"     : 1,
+                    "on-click-right": "mode",
+                    "format": {
+                              "months":     "<span color='#ffead3'><b>{}</b></span>",
+                              "days":       "<span color='#ecc6d9'><b>{}</b></span>",
+                              "weeks":      "<span color='#99ffdd'><b>W{}</b></span>",
+                              "weekdays":   "<span color='#ffcc66'><b>{}</b></span>",
+                              "today":      "<span color='#ff6699'><b><u>{}</u></b></span>"
+                              }
+                    },
+        "actions":  {
+                    "on-click-right": "mode",
+                    "on-click-forward": "tz_up",
+                    "on-click-backward": "tz_down",
+                    "on-scroll-up": "shift_up",
+                    "on-scroll-down": "shift_down"
+                    }
+    },
+
+    "custom/exit": {
+        "format": "",
+        "on-click": "$HOME/.config/waybar/scripts/run_power_menu.sh",
+        "tooltip": false
+    },
+
+    "custom/weather": {
+        "format": "{}",
+        "on-click": "wpaperd",
+        "tooltip": true,
+        "restart-interval": 300,
+        "exec": "$HOME/.config/waybar/scripts/waybar-wttr.py",
+        "return-type": "json"
+    },
+    
+    "network": {
+        "interval": 1,
+        "format": "{bandwidthDownBytes}",
+        "format-wifi": "   {essid}",
+        "format-ethernet": "󰈀  {ipaddr}/{cidr}",
+        "format-disconnected": "󰤭",
+        "tooltip-format": "󰈀 {ifname} via {gwaddri}",
+        "tooltip-format-wifi": "   {essid} ({signalStrength}%)",
+        "tooltip-format-ethernet": "󰈀 {ifname} ({ipaddr}/{cidr})",
+        "tooltip-format-disconnected": "Disconnected",
+        "max-length": 50,
+        "on-click": "alacritty -e nmtui"
+    },
+
+    "pulseaudio": {
+        "format": "{icon} {volume}%",
+        "format-muted": " ({volume}%)",
+        "on-click": "pavucontrol -t 3",
+        "on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+        "on-click-middle": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+        "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ -1%",
+        "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ +1%",
+        "tooltip-format": "{desc}",
+        "format-icons": {
+            "default": ["", "", ""]
+        }
+    },
+
+    "tray": {
+        "icon-size": 15,
+        "spacing": 15
+    }
+}
