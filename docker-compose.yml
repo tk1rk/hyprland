@@ -1,0 +1,27 @@
+# docker-compose.yml - Jellyfin media server
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    # Run as your user to avoid permission issues
+    user: 1000:1000
+    restart: unless-stopped
+    ports:
+      # Web UI port
+      - "8096:8096"
+      # HTTPS port (optional, for direct SSL)
+      - "8920:8920"
+      # Local service discovery port
+      - "7359:7359/udp"
+    volumes:
+      # Jellyfin configuration and metadata
+      - ./config:/config
+      # Transcoding temporary directory - use fast storage
+      - /tmp/jellyfin-cache:/cache
+      # Mount your media directories as read-only
+      - /mnt/media/movies:/media/movies:ro
+      - /mnt/media/shows:/media/shows:ro
+      - /mnt/media/music:/media/music:ro
+    environment:
+      # Set your timezone
+      - TZ=America/Los_Angeles
